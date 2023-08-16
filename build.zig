@@ -1,9 +1,11 @@
 const std = @import("std");
+const builtin = @import("builtin");
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
+    const os_tag = target.os_tag orelse builtin.os.tag;
     const exe = b.addExecutable(.{
         .name = "nasm",
         .target = target,
@@ -85,13 +87,13 @@ pub fn build(b: *std.Build) void {
         .HAVE_CPU_TO_LE64 = null,
         .HAVE_DECL_STRCASECMP = 0,
         .HAVE_DECL_STRICMP = 0,
-        .HAVE_DECL_STRLCPY = 0,
-        .HAVE_DECL_STRNCASECMP = 0,
+        .HAVE_DECL_STRLCPY = have(os_tag == .macos) orelse 0,
+        .HAVE_DECL_STRNCASECMP = have(os_tag == .macos) orelse 0,
         .HAVE_DECL_STRNICMP = 0,
-        .HAVE_DECL_STRNLEN = 0,
+        .HAVE_DECL_STRNLEN = have(os_tag == .macos) orelse 0,
         .HAVE_DECL_STRRCHRNUL = 0,
-        .HAVE_DECL_STRSEP = 0,
-        .HAVE_ENDIAN_H = 1,
+        .HAVE_DECL_STRSEP = have(os_tag == .macos) orelse 0,
+        .HAVE_ENDIAN_H = have(os_tag != .macos),
         .HAVE_FACCESSAT = 1,
         .HAVE_FCNTL_H = 1,
         .HAVE_FILENO = 1,
@@ -134,7 +136,7 @@ pub fn build(b: *std.Build) void {
         .HAVE_ISASCII = 1,
         .HAVE_ISCNTRL = 1,
         .HAVE_MACHINE_ENDIAN_H = 1,
-        .HAVE_MEMPCPY = 1,
+        .HAVE_MEMPCPY = have(os_tag != .macos),
         .HAVE_MEMPSET = null,
         .HAVE_MINIX_CONFIG_H = null,
         .HAVE_MMAP = 1,
@@ -153,7 +155,7 @@ pub fn build(b: *std.Build) void {
         .HAVE_STRICMP = 1,
         .HAVE_STRINGS_H = 1,
         .HAVE_STRING_H = 1,
-        .HAVE_STRLCPY = null,
+        .HAVE_STRLCPY = have(os_tag == .macos),
         .HAVE_STRNCASECMP = 1,
         .HAVE_STRNICMP = 1,
         .HAVE_STRNLEN = 1,
@@ -162,7 +164,7 @@ pub fn build(b: *std.Build) void {
         .HAVE_STRUCT_STAT = null,
         .HAVE_STRUCT__STATI64 = null,
         .HAVE_SYSCONF = null,
-        .HAVE_SYS_ENDIAN_H = 1,
+        .HAVE_SYS_ENDIAN_H = have(os_tag != .macos),
         .HAVE_SYS_MMAN_H = 1,
         .HAVE_SYS_PARAM_H = null,
         .HAVE_SYS_RESOURCE_H = null,
@@ -172,7 +174,7 @@ pub fn build(b: *std.Build) void {
         .HAVE_TYPEOF = null,
         .HAVE_UINTPTR_T = 1,
         .HAVE_UNISTD_H = null,
-        .HAVE_VSNPRINTF = null,
+        .HAVE_VSNPRINTF = have(os_tag == .macos),
         .HAVE_WCHAR_H = null,
         .HAVE__ACCESS = null,
         .HAVE__BITSCANREVERSE = null,
